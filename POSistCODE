@@ -1,0 +1,224 @@
+////////////////////////// Header Files ////////////////////
+#include<iostream>
+#include<string.h>
+#include"md5.h"
+
+using namespace std;
+
+////////////////////// structure of date //////////////////
+int NNumber = 0;
+struct date{
+	int format;							//////// date format
+	time_t value;						//////// date assigned
+}
+
+///////////////////// structure of data //////////////////
+
+struct data{
+	long int hashKey;				//////// key value for DES algorithm
+	long int ownerId;       //////// owner id of the user
+	float value;						//////// data value of the user
+	string name;						//////// name of the user
+	string hashValue;				//////// hashset of the users data
+}
+
+//////////////////// Genesis Node Structure //////////////
+
+struct GenesisNode{
+	date timestamp;													//////// timestamp assigned
+	data nodeData;													//////// data of the user in both formats
+	int nodeNumber;													//////// nodeNumber incrementally assigned
+	string nodeId;													//////// nodeId randomly assigned
+	GenesisNode *referenceNodeId = NULL;		//////// parent node address
+	normalNode *childReferenceNodeId[];  		//////// children node address array
+	GenesisNode *genesisReferenceNodeId;		//////// reference of the Genesis Node
+	string hashValue;												//////// Hash Value of the node
+}
+
+
+struct normalNode{
+	date timestamp;													//////// timestamp assigned
+	data nodeData;													//////// data of the user in both formats
+	int nodeNumber;													//////// nodeNumber incrementally assigned
+	string nodeId;													//////// nodeId randomly assigned
+	GenesisNode *referenceNodeId;						//////// parent node address
+	normalNode *childReferenceNodeId[n];  		//////// children node address array
+	GenesisNode *genesisReferenceNodeId;		//////// reference of the Genesis Node
+	string hashValue;												//////// Hash Value of the node
+}
+
+
+GenesisNode createGenesisNode(){
+	GenesisNode *root = (GenesisNode*)malloc(sizeof(GenesisNode));
+	root.genesisReferenceNodeId = NULL;
+	return root;
+}
+
+void createNormalNode(int format, time_t t, int hashKey, string ownerId, 
+											float value, string name, string hashValue GenesisNode root){
+	normalNode *node = (normalNode)malloc(sizeof(normalNode));
+  node.date.format = format;
+	node.date.value = t;
+  node.data.hashKey = hashKey;
+	node.data.ownerId = ownerId;
+	node.data.value = value;
+	node.data.name = name;
+	node.data.hashValue = hashValue;
+
+	node.nodeNumber = NNumber++;
+	node.nodeId = hashValue + node.nodeNumber;
+	node.referenceNodeId = root;
+	node.genesisReferenceNodeId = root;
+	
+}
+
+string createHASH(int format,time_t t,int hashKey,string ownerId,
+									int datavalue,string empName){
+	ostringstream str1,str2,str3,str4,str5,str6;
+  str1 << format;
+	str2 << t;
+  str3 << hashKey;
+	str4 << ownerId;
+	str5 << datavalue;
+	str6 << empName;
+  string ans = str1.str() + str2.str() + str3.str() + 
+								str4.str() + str5.str() + str6.str() ;
+  
+  return md5(ans);
+	
+}
+
+void normalNodecreation(){
+	
+		int format, hashKey, datavalue;
+		string ownerId, empName, hashValue;		
+
+		cout<<" Enter date format(";
+		cout<<" 1-ddmmyyyy";
+		cout<<" 2-mmddyyyy";
+		cout<<" 3-yyyyddmm";
+    cin>> format;
+		time_t t;
+		time(&t);
+		cout<<"Enter hash Key for DES";
+		cin>>hashKey;
+		cout<<"Enter owner ID:";
+		cin>>ownerId;
+		cout<<"Enter the datavalue:";
+		cin>>datavalue;
+		if(root.value<datavalue){
+				cout<<" Sorry!!! Current data cannot be inserted";
+				cout<<" because it doesnot match the required criteria";
+				cout<<" Exiting....";
+		exit(0);
+
+		}
+		root.value = root.value - datavalue;  
+		cout<<"Enter Employees Name:";
+		cin>>empName;
+		hashValue = createHASH(format,ctime(&t),hashKey,ownerId,datavalue,empName, root);
+		createNormalNode(format,ctime(&t),hashKey,ownerId,datavalue,empName,hashValue);
+
+}
+
+////////////////////Print Details///////////////////////////
+void printDetails(normalNode node){
+		normalNode *node = (normalNode)malloc(sizeof(normalNode));
+
+	cout<<node.date.format<<"\n";
+	cout<<node.date.value<<"\n";
+	cout<<node.data.hashKey<<"\n";
+	cout<<node.data.ownerId<<"\n";
+	cout<<node.data.value<<"\n";
+	cout<<node.data.name<<"\n";
+	
+
+}
+
+
+///////////????Driver function??????????????????/////////////
+
+
+int main(){
+
+  ////////////////////////////create genesis node////////////
+	GenesisNode root;
+	root = createGenesisNode();
+	
+	/////////////////////////// 5 set of child nodes ///////////
+	cout<<" 5 child nodes of Genesis node needed to";
+	cout<<" be created do enter data";
+
+	for(int i = 0; i < 5; i++){
+		
+    normalNodecreation();	
+	}
+
+  ///////////////////// child node to particular node //////////////
+	string nodeId;
+	int i = 0;
+	cout<< " Enter node ID ";
+	cin>> nodeId;
+	while(root.childReferenceNodeId[i++]){
+		normalNode node = root.childReferenceNodeId[i-1];
+		if(nodeId == node.nodeId){
+			normalNodeCreation();	  
+		}
+	}
+
+  //////////////////// encriypt or decriypt data inside a node////////
+  cout<<" Enter the nodeId";
+  cin>> nodeId;
+	i=0;
+  while(root.childReferenceNodeId[i++]!=NULL){
+		normalNode node = root.childRefrenceNodeId[i-1];
+		if(nodeId == node.nodeId){  
+					////// md5() is an inbuilt function in "md5.h" library
+					////// which converts the data from:
+					////// encrypted form to decrypted form and vice versa.
+			cout<< md5(node.hashValue);
+
+    }
+	}
+  if(!root.childReferenceNodeId[i-1])
+		cout<< "Sorry!!! No such node is discovered";
+
+  ////////////////// Verify the node ////////////////////////////////
+	
+	cout<< "Enter the NodeId and the Node Hash Key";
+  cin>> nodeId >> hashKey;
+	i=0;
+  while(root.childReferenceNodeId[i++]!=NULL){
+		normalNode node = root.childRefrenceNodeId[i-1];
+		if(nodeId == node.nodeId && hashKey == node.hashKey){  
+			printDetails(node);
+
+    }
+		else{
+      cout<< "Sorry!!! Entered details do not matc hthe credentials:";
+			cout<< "Exiting";
+			exit(0);
+		}
+	}
+ 
+ //////////////// edit value of the node ////////////////////////////
+
+	cout<< " Enter nodeId to edit the details:"
+	cin>> nodeId;
+	i=0;
+	while(root.childReferenceNodeId[i++]!=NULL){
+		normalNode node = root.childReferenceNodeId[i-1];
+		if(nodeId == node.nodeId){  
+			crearteNormalNode();
+
+    }
+		else{
+      cout<< "Sorry!!! Entered details do not match the credentials:";
+			cout<< "Exiting";
+			exit(0);
+		}
+	}
+
+
+	return 0;
+}
